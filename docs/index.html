@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An unofficial keyboard studio for compatible Wooting keyboards.">
+  <meta name="theme-color" content="#111114">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; object-src 'none'; base-uri 'none'">
+  <title>OpenWootility · Keyboard Studio</title>
+  <link rel="icon" href="./icon.svg">
+  <link rel="stylesheet" href="./studio.css">
+  <script type="module" src="./studio.js"></script>
+</head>
+<body>
+  <section id="loading" class="splash" aria-label="Loading OpenWootility">
+    <img src="./icon.svg" alt="" width="64" height="64">
+    <p class="eyebrow">UNOFFICIAL Wootility</p>
+    <h1>OpenWootility</h1>
+    <p>Made by wyktdev with love <span class="heart" aria-hidden="true">♥</span></p>
+    <span class="load-line" aria-hidden="true"></span>
+    <noscript>Enable JavaScript to open the editor.</noscript>
+  </section>
+
+  <div id="studio" class="studio" hidden>
+    <header class="app-header">
+      <div class="brand">
+        <img src="./icon.svg" alt="" width="36" height="36">
+        <div><strong>OpenWootility</strong><small>UNOFFICIAL Wootility</small></div>
+      </div>
+      <nav class="mode-bar" aria-label="Workspace">
+        <button type="button" data-tab="tune" aria-current="page"><span aria-hidden="true">⌁</span> Performance</button>
+        <button type="button" data-tab="colors"><span aria-hidden="true">◈</span> Lighting</button>
+        <button type="button" data-tab="map"><span aria-hidden="true">⌘</span> Keymap</button>
+        <button type="button" data-tab="advanced"><span aria-hidden="true">⇌</span> Advanced</button>
+        <button type="button" data-tab="monitor"><span aria-hidden="true">◉</span> Monitor</button>
+        <button type="button" data-tab="profiles"><span aria-hidden="true">▤</span> Profiles</button>
+        <button type="button" data-tab="device"><span aria-hidden="true">⊞</span> Device</button>
+      </nav>
+      <span class="app-version">STUDIO <span>0.6.2</span></span>
+    </header>
+
+    <aside class="sidebar" aria-label="Device and profiles">
+      <section class="device-card">
+        <div class="split"><span class="eyebrow">Device</span><span id="connection" class="pill demo">Demo mode</span></div>
+        <div class="device-illustration" aria-hidden="true"><span></span></div>
+        <strong id="device-name">80HE</strong>
+        <small id="device-info">ANSI · Sample profile</small>
+        <label class="model-picker" id="demo-model-label">Keyboard model
+          <select id="demo-model"><option value="80">80HE ANSI</option><option value="60">60HE v2 ANSI</option></select>
+        </label>
+        <label class="model-picker" id="demo-layout-label">Physical layout <select id="demo-layout"></select></label>
+        <button id="connect" type="button">Connect keyboard</button>
+      </section>
+      <section class="sidebar-profiles">
+        <div class="split"><p class="eyebrow" id="slot-label">Profile slots</p><button id="manage-profiles" type="button" title="Manage profiles" aria-label="Manage profiles">↗</button></div>
+        <label class="compact-profile">Profile <select id="profile"></select></label>
+        <div id="profile-cards" class="profile-cards" aria-label="Onboard profiles"></div>
+      </section>
+      <footer>Made by wyktdev with love <span class="heart" aria-hidden="true">♥</span><br><a href="https://github.com/wyktdev/OpenWootility-Studio">Source on GitHub</a></footer>
+    </aside>
+
+    <main id="workspace" tabindex="-1">
+      <header class="workspace-head">
+        <div>
+          <p class="eyebrow">Keyboard studio</p>
+          <h1 id="page-title">Performance</h1>
+          <p id="page-hint">Set how far a key travels before it registers.</p>
+        </div>
+        <div class="workspace-profile"><span class="profile-glyph" aria-hidden="true">▤</span><div><small>Editing profile</small><strong id="editing-profile">Typing</strong></div></div>
+      </header>
+
+      <section class="stage" aria-labelledby="layout-title">
+        <div class="stage-head split">
+          <div class="stage-name"><h2 id="layout-title">80HE ANSI</h2><span id="key-count" class="muted">84 keys</span><span id="lightbar-feed" class="pill" role="status" hidden></span></div>
+          <div class="row stage-tools">
+            <label id="layer-control" class="row" hidden>Layer
+              <select id="layer"><option value="0">Base</option><option value="1">Fn 1</option><option value="2">Fn 2</option><option value="3">Fn 3</option></select>
+            </label>
+            <div id="lighting-mode" class="segments" role="group" aria-label="Lighting tool" hidden>
+              <button id="select-tool" type="button" aria-pressed="true">Select</button>
+              <button id="brush-tool" type="button" aria-pressed="false">Brush</button>
+            </div>
+          </div>
+        </div>
+        <div id="key-stage" class="key-stage">
+          <div id="board" class="board" aria-label="Keyboard keys"></div>
+          <div id="marquee" class="marquee" aria-hidden="true" hidden></div>
+        </div>
+        <div class="stage-foot split">
+          <div class="row">
+            <span id="selected-count" class="pill">0 selected</span>
+            <button id="select-all" type="button" title="Select all keys (Ctrl+A)">Select all</button>
+            <button id="select-wasd" type="button">WASD</button><select id="key-group" aria-label="Select a group of keys"><option value="">Key groups</option><option value="letters">Letters</option><option value="numbers">Number row</option><option value="arrows">Arrows</option><option value="function">Function row</option><option value="modifiers">Modifiers</option><option value="numpad">Numpad</option><option value="invert">Invert selection</option></select>
+            <button id="clear-selection" type="button">Clear selection</button>
+          </div>
+          <p id="stage-hint" class="muted">Click a key or drag to select an area.</p>
+        </div>
+      </section>
+
+      <div class="dock">
+        <section class="editor-section" data-panel="tune" aria-labelledby="tune-title">
+          <header class="editor-head split">
+            <div><h2 id="tune-title">Switch behavior</h2><p class="muted">Edit the profile defaults or apply a different setting to selected keys.</p></div>
+            <label class="toggle scope-toggle"><input id="per-key" type="checkbox"><span aria-hidden="true"></span> Edit selected keys</label>
+          </header>
+          <div class="quick-strip"><span class="eyebrow">Quick starts</span><button type="button" data-tuning="typing">Everyday typing</button><button type="button" data-tuning="balanced">Balanced</button><button type="button" data-tuning="fast">Fast response</button></div>
+          <div class="editor-grid tuning-grid">
+            <section class="tile actuation-card">
+              <div class="split"><h3>Actuation point</h3><output id="actuation-value" for="actuation">1.60 mm</output></div>
+              <p class="muted">How far a key moves before it sends a press.</p>
+              <div class="actuation-body">
+                <div class="switch-diagram" aria-hidden="true"><div class="switch-cap"></div><div class="switch-stem"></div><div class="switch-housing"></div><div class="switch-base"></div><div id="actuation-marker" class="actuation-marker"></div></div>
+                <div class="slider-field">
+                  <input id="actuation" type="range" min=".1" max="4" step=".05" value="1.6" aria-label="Actuation">
+                  <div class="range-labels"><span>0.10 mm</span><span>4.00 mm</span></div>
+                </div>
+              </div>
+            </section>
+            <section class="tile rapid-card">
+              <div class="split"><h3>Rapid Trigger</h3><label class="toggle"><input id="rapid" type="checkbox" checked aria-label="Rapid Trigger"><span aria-hidden="true"></span></label></div>
+              <p class="muted">Reset the key as soon as it starts moving back up.</p>
+              <label class="split" for="sensitivity">Sensitivity <output id="sensitivity-value">0.20 mm</output></label>
+              <input id="sensitivity" type="range" min=".1" max="4" step=".05" value=".2">
+              <div class="range-labels"><span>More sensitive</span><span>Less sensitive</span></div>
+              <label class="toggle" id="continuous-label" hidden><input id="continuous" type="checkbox"><span aria-hidden="true"></span> Continuous mode</label>
+              <label class="toggle"><input id="split-sensitivity" type="checkbox"><span aria-hidden="true"></span> Separate release sensitivity</label>
+              <label id="release-label" for="release-sensitivity" hidden>Release sensitivity (mm)<input id="release-sensitivity" type="number" min="0.1" max="4" step="0.01" value="0.2"></label>
+            </section>
+          </div>
+          <div class="row editor-actions"><button id="stage-tuning" class="primary" type="button">Stage profile tuning</button><button id="clear-overrides" type="button" hidden>Clear selected overrides</button></div>
+        </section>
+
+        <section class="editor-section" data-panel="colors" aria-labelledby="lighting-title" hidden>
+          <header class="editor-head"><h2 id="lighting-title">Per-key color</h2><p class="muted">Paint a selection, fill the board, or switch to Brush to paint directly on the keys.</p></header>
+          <div class="editor-grid lighting-grid">
+            <section class="tile color-tile">
+              <div class="split"><h3>Paint color</h3><input type="color" id="color" value="#a59bff" aria-label="Paint color"></div>
+              <div id="color-plane" class="color-plane" aria-label="Saturation and brightness"><span id="color-cursor" aria-hidden="true"></span></div>
+              <input id="hue" class="hue" type="range" min="0" max="359" value="247" aria-label="Hue">
+              <div class="split color-readout"><label for="hex-entry">Hex</label><input id="hex-entry" type="text" value="#A59BFF" maxlength="7" spellcheck="false" autocomplete="off"></div>
+            </section>
+            <section class="tile paint-tile">
+              <h3>Paint tools</h3>
+              <div class="palette" id="palette" aria-label="Color swatches"></div>
+              <div class="row"><button id="paint-selected" class="primary" type="button">Paint selected</button><button id="paint-all" type="button">Apply color to all keys</button></div>
+              <div class="preset-ribbon"><span class="gradient-sample" aria-hidden="true"></span><div><strong>Color recipes</strong><p class="muted">Apply to your selection or the whole board</p></div></div>
+              <div class="row"><button id="gradient" type="button">Prism</button><button type="button" data-palette="ember">Ember</button><button type="button" data-palette="ocean">Ocean</button></div>
+            </section>
+            <section class="tile preview-tile">
+              <h3>Lighting effect</h3>
+              <label>Effect <select id="lighting-effect"><option value="static">Static</option><option value="wave">Wave</option><option value="scan">Scan</option><option value="breath">Breath</option><option value="cycle">Cycle</option><option value="noise">Noise</option><option value="spiral">Spiral</option></select></label>
+              <label>Brightness <input id="lighting-brightness" type="range" min="0" max="100" value="100"><output id="lighting-level">100%</output></label>
+              <label id="speed-label">Effect speed <input id="lighting-speed" type="number" min="0" max="255" step="1" value="16"></label>
+              <details id="indicator-colors"><summary>Lock indicator colors</summary><div class="row"><label>Caps Lock <input type="color" data-indicator="caps" value="#ffffff"></label><label>Fn Lock <input type="color" data-indicator="fn" value="#ffffff"></label><label>Scroll Lock <input type="color" data-indicator="scroll" value="#ffffff"></label><label>Num Lock <input type="color" data-indicator="num" value="#ffffff"></label></div></details>
+              <button id="stage-lighting" class="primary" type="button">Stage effect and brightness</button>
+              <p class="muted" id="lighting-hint">The board above previews staged effects. The keyboard preview shows the static palette.</p>
+              <button id="preview" type="button">Preview on keyboard</button>
+              <button id="restore" type="button">Restore keyboard lighting</button>
+            </section>
+            <section id="lightbar-panel" class="tile lightbar-panel" aria-labelledby="lightbar-title" hidden>
+              <header class="split"><div><h3 id="lightbar-title">Lightbar</h3><p class="muted" id="lightbar-hint">Set a base look and keep the profile’s indicator layers.</p></div><label class="toggle"><input id="lightbar-enabled" type="checkbox"><span aria-hidden="true"></span> Enabled</label></header>
+              <div class="row lightbar-connection"><p id="lightbar-live-status" class="muted"></p><button id="lightbar-connect" type="button" hidden>Connect for live colors</button></div>
+              <div class="lightbar-options">
+                <label>Base look <select id="lightbar-mode"><option value="existing">Device layers</option><option value="solid">Solid color</option><option value="pulse">Pulse</option><option value="segments">Per-segment color</option></select></label>
+                <label id="lightbar-color-label" hidden>Color <input id="lightbar-color" type="color" value="#a5ecd6"></label>
+                <label id="lightbar-secondary-label" hidden>Pulse color <input id="lightbar-secondary" type="color" value="#203c54"></label>
+                <label id="lightbar-duration-label" hidden>Pulse interval (s)<input id="lightbar-duration" type="number" min="0.1" max="20" step="0.1" value="1.8"></label>
+              </div>
+              <div id="lightbar-segment-colors" class="lightbar-segment-colors" hidden></div>
+              <div id="lightbar-draft-row" class="row" hidden><span class="muted">Unsaved look</span><div id="lightbar-draft" class="lightbar-draft" aria-label="Preview of unsaved lightbar settings"></div></div>
+              <div class="quick-strip"><span class="eyebrow">Recipes</span><button type="button" data-bar-recipe="keys">Sample keyboard palette</button><button type="button" data-bar-recipe="dusk">Dusk gradient</button><button type="button" data-bar-recipe="contrast">Alternating</button></div>
+              <div class="lightbar-options">
+                <label class="toggle"><input id="lightbar-linked" type="checkbox"><span aria-hidden="true"></span> Follow RGB brightness</label>
+                <label id="lightbar-brightness-label">Bar brightness <input id="lightbar-brightness" type="range" min="0" max="100" value="100"><output id="lightbar-level">100%</output></label>
+                <label class="toggle"><input id="lightbar-inherit" type="checkbox"><span aria-hidden="true"></span> Include global layers</label>
+              </div>
+              <button id="stage-lightbar" class="primary" type="button">Stage lightbar settings</button>
+            </section>
+          </div>
+        </section>
+
+        <section class="editor-section" data-panel="map" aria-labelledby="map-title" hidden>
+          <header class="editor-head"><h2 id="map-title">Key bindings</h2><p id="map-hint" class="muted">Select physical keys, then choose what they should send.</p></header>
+          <div class="editor-grid">
+            <section class="tile"><h3>Selection</h3><p id="map-selection" class="muted">Select keys on the board to see their current bindings.</p></section>
+            <section class="tile"><h3>Assign a binding</h3><label>Find a binding <input id="binding-search" type="search" placeholder="Search by key or name"></label><label>New binding <select id="binding"></select></label><div class="row"><button id="capture" type="button">Capture keystroke</button><button id="stage-map" class="primary" type="button">Stage selected bindings</button></div></section>
+          </div>
+        </section>
+
+        <section class="editor-section" data-panel="advanced" aria-labelledby="advanced-title" hidden>
+          <header class="editor-head"><h2 id="advanced-title">Advanced keys</h2><p id="advanced-hint" class="muted">Select one physical key to create an action on this layer.</p></header>
+          <div class="editor-grid advanced-grid">
+            <section class="tile"><h3 id="advanced-target">Select a key</h3>
+              <label>Action <select id="advanced-kind"><option value="dks">Dynamic Keystroke</option><option value="mod-tap">Mod Tap</option><option value="toggle">Toggle Key</option><option value="rappy">Rappy Snappy</option><option value="socd">Snappy Tappy (SOCD)</option></select></label>
+              <div id="dks-editor" class="dks-editor"></div>
+              <label id="action-primary-label" hidden><span id="action-primary-title">Binding</span><select id="action-primary"></select></label>
+              <label id="action-secondary-label" hidden>Hold binding <select id="action-secondary"></select></label>
+              <label id="action-pair-label" hidden>Paired key <select id="action-pair"></select></label>
+              <label id="action-mode-label" hidden><span id="action-mode-title">Priority</span><select id="action-mode"></select></label>
+              <label class="toggle" id="action-bottom-label" hidden><input id="action-bottom" type="checkbox"><span aria-hidden="true"></span> Allow both when fully pressed</label>
+              <div class="row"><button id="stage-advanced" class="primary" type="button">Stage action</button><button id="remove-advanced" type="button">Remove action</button></div>
+            </section>
+            <section class="tile"><h3>Actions on this layer</h3><ul id="advanced-list" class="detail-list"></ul></section>
+          </div>
+        </section>
+
+        <section class="editor-section" data-panel="monitor" aria-labelledby="monitor-title" hidden>
+          <header class="editor-head split"><div><h2 id="monitor-title">Analog travel</h2><p id="monitor-hint" class="muted">Live key travel appears here when the device is connected.</p></div><button id="monitor-toggle" class="primary" type="button">Start analog monitor</button></header>
+          <div class="editor-grid monitor-grid"><div class="tile travel" id="travel" aria-label="Pressed keys"><p class="muted">No keys pressed.</p></div><section class="tile"><h3>Deepest press</h3><output id="peak-travel" class="peak-travel">—</output><button id="clear-peak" type="button">Reset history</button></section>
+            <section class="tile monitor-history"><div class="split"><h3>Switch comparison</h3><button id="export-peaks" type="button" disabled>Export CSV</button></div><p class="muted">Compare the deepest reading for each key. Select keys on the board to narrow the table.</p><div id="history-list" class="history-list"><p class="muted">Press a key to start recording.</p></div></section>
+          </div>
+        </section>
+
+        <section class="editor-section" data-panel="device" aria-labelledby="device-title" hidden>
+          <header class="editor-head"><h2 id="device-title">Device capabilities</h2><p class="muted">What you can use on the current connection and layout.</p></header>
+          <div class="editor-grid"><section class="tile"><h3 id="capability-model">Keyboard</h3><dl id="device-capabilities" class="capability-list"></dl></section><section class="tile"><h3>Model library</h3><p class="muted">Every Wooting model has an offline workspace. Select a model and physical layout to try a configuration.</p><ul id="model-library" class="detail-list"></ul></section></div>
+        </section>
+
+        <section class="editor-section" data-panel="profiles" aria-labelledby="profiles-title" hidden>
+          <header class="editor-head"><h2 id="profiles-title">Onboard &amp; local profiles</h2><p class="muted">Switch the active slot, or store and move an editable preset.</p></header>
+          <div class="editor-grid">
+            <section class="tile"><h3>Onboard slot</h3><button id="activate-profile" class="primary" type="button">Activate selected slot</button><button id="refresh" type="button">Read keyboard again</button></section>
+            <section class="tile"><h3>Local presets</h3>
+              <label>Local preset name <input type="text" id="preset-name" maxlength="40" placeholder="e.g. Typing"></label>
+              <button id="save-preset" type="button">Save local preset</button>
+              <label>Saved presets <select id="presets"></select></label>
+              <div class="row"><button id="load-preset" type="button">Load</button><button id="delete-preset" type="button">Remove</button></div>
+            </section>
+            <section class="tile"><h3>Import / export</h3>
+              <p class="muted">JSON presets are staged in the editor before any device writes.</p>
+              <button id="export" type="button">Export JSON</button><label class="file-label">Import JSON <input id="import" class="file-input" type="file" accept=".json,application/json"></label>
+            </section>
+          </div>
+        </section>
+      </div>
+      <section class="savebar" aria-label="Pending changes">
+        <div class="save-state"><span class="save-dot" aria-hidden="true"></span><div><strong id="changes">No pending changes</strong><p id="status" role="status">Explore a keyboard or connect one to check its capabilities.</p></div></div>
+        <div class="row"><button id="undo" type="button">Undo</button><button id="redo" type="button">Redo</button><button id="discard" type="button">Discard</button><button id="review" class="primary" type="button">Review &amp; save</button></div>
+      </section>
+    </main>
+  </div>
+  <dialog id="confirm">
+    <form method="dialog">
+      <p class="eyebrow">Review changes</p><h2 id="confirm-title">Save profile</h2>
+      <p id="confirm-detail"></p><ul id="confirm-list"></ul>
+      <div class="row"><button value="cancel" autofocus>Cancel</button><button value="save" class="primary">Save changes</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
