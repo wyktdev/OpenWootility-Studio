@@ -1,4 +1,4 @@
-import { colorHex, colorWord, connectKeyboard } from "./device.js";
+import { colorHex, colorWord, connectKeyboard } from "./device.js?v=0.7.2";
 import { bindingLabel, codes, keyOptions, layout, makeDemo, paintKey, usageLabel } from "./layout.js";
 import { getModel, models } from "./models.js";
 import { advancedLabel } from "./customizations.js";

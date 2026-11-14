@@ -124,3 +124,29 @@ test("every Studio gradient uses full RGB intensity between its stops", () => {
     }
   }
 });
+
+
+test("ARM output selection excludes constant padding in the real 80HE report descriptor", async () => {
+  const capacities = [32, 62, 254, 510, 1022, 2046];
+  const sent = [];
+  const device = {
+    collections: [{ usagePage: 0xff55, usage: 1, outputReports: capacities.map((capacity, index) => ({
+      reportId: index + 1,
+      items: [
+        { reportSize: 8, reportCount: capacity, isConstant: false },
+        { reportSize: (2046 - capacity) * 8, reportCount: 1, isConstant: true },
+      ],
+    })) }],
+    sendReport: async (id, bytes) => sent.push({ id, bytes }),
+  };
+  const session = new KeyboardSession(device, getModel("80"));
+  assert.deepEqual(session.reports.map(report => report.size), capacities);
+  await session.put(0x0e, 1, new Uint8Array(180));
+  assert.equal(sent[0].id, 3);
+  assert.equal(sent[0].bytes.length, 254);
+  assert.deepEqual([...sent[0].bytes.slice(0, 6)], [0xd1, 0xda, 0x0e, 3, 180, 0]);
+  await session.put(0x16, 0, new Uint8Array(11), { flags: 0, preferred: 2 });
+  assert.equal(sent[1].id, 2);
+  await session.output(new Uint8Array(255), 5);
+  assert.equal(sent[2].id, 5);
+});

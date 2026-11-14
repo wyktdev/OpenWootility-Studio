@@ -33,7 +33,7 @@ Edits are staged in the browser with undo and redo. **Review & save** lists the 
 | 80HE | ANSI, ISO, and JIS | ARM profile format, subject to firmware and successful device read |
 | UwU and UwU RGB | Keypad | ARM profile format, subject to firmware and successful device read. RGB is available on the RGB model |
 
-Onboard configuration is experimental and requires ARM firmware 2.10 or newer, with a recognized layout and compatible profile replies. Lighting core and advanced keys currently support the first onboard slot and single-report messages. Legacy or unsupported connections can still use local profiles. An 80HE running firmware 2.14.2 supplied read-only fixtures. Simulated devices exercised writes and read-back failures. Firmware updates, calibration, gamepad mapping, system settings, and linked profiles are outside this release.
+Onboard configuration is experimental and requires ARM firmware 2.10 or newer, with a recognized layout and compatible profile replies. Lighting core and advanced keys currently support the first onboard slot and single-report messages. Legacy or unsupported connections can still use local profiles. RGB color saves and matching read-back were verified through Edge WebHID on an 80HE running firmware 2.14.2, with the original lighting restored afterwards. Other configuration writes and failure reporting were exercised with simulated devices. Firmware updates, calibration, gamepad mapping, system settings, and linked profiles are outside this release.
 
 80HE and 80HE+ lightbar settings save to the active slot when firmware supplies a compatible lightbar profile. The editor changes that slot's base look and keeps its existing conditional effects and global profile data.
 

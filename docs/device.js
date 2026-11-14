@@ -14,7 +14,9 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const equal = (a, b) => a.length === b.length && a.every((value, index) => value === b[index]);
 const config = device => device.collections.find(item => configPages.includes(item.usagePage) && item.usage === 1);
 const analog = device => device.collections.some(item => analogPages.includes(item.usagePage));
-const reportSize = report => report.items.reduce((sum, item) => sum + item.reportCount * item.reportSize, 0) / 8;
+// Constant HID items are padding. Firmware dispatches by the usable capacity of each report ID.
+const reportSize = report => report.items.filter(item => !item.isConstant)
+  .reduce((sum, item) => sum + item.reportCount * item.reportSize, 0) / 8;
 const rawMm = value => Math.round(16384 + 4096 * value);
 const mm = value => Math.round((value - 16384) / 4096 * 100) / 100;
 const dimensions = (rows, count, width = 21) => rows.length === count && rows.every(row => row?.length === width);
