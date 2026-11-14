@@ -132,20 +132,20 @@ export const wootilityPresets = [
 ];
 
 export const studioPresets = [
-  { id: "wykt", name: "Wykt", description: "Dark navy fading into deep violet", stops: ["#071334", "#141d66", "#301457", "#190a36"] },
-  { id: "abyss", name: "Abyss", description: "Deep blue with cold teal edges", stops: ["#031526", "#064568", "#087278"] },
-  { id: "amethyst", name: "Amethyst", description: "Plum, violet and lilac", stops: ["#260c42", "#7423aa", "#b065d4"] },
-  { id: "aurora", name: "Aurora", description: "Mint through indigo", stops: ["#0b664b", "#24c99a", "#246bb3", "#48277d"] },
-  { id: "blue-hour", name: "Blue Hour", description: "Twilight blues and lavender", stops: ["#08214c", "#2359b7", "#7975bd"] },
-  { id: "cyber", name: "Cyber", description: "Electric cyan and hot magenta", stops: ["#00bcd4", "#4149ce", "#d51a8f"] },
-  { id: "ember-glow", name: "Ember Glow", description: "Burgundy through warm amber", stops: ["#3e0716", "#a72519", "#e59124"] },
-  { id: "forest", name: "Forest", description: "Pine, moss and soft jade", stops: ["#082b22", "#27683d", "#79a85a"] },
-  { id: "glacier", name: "Glacier", description: "Ice blue with a cool white crest", stops: ["#0b3871", "#40b4dd", "#bfdeec"] },
-  { id: "rose-quartz", name: "Rose Quartz", description: "Mulberry, rose and blush", stops: ["#541b48", "#ad4574", "#efabc0"] },
-  { id: "sakura", name: "Sakura", description: "Violet dusk with pink blossoms", stops: ["#452552", "#aa5e9c", "#f4b3ce"] },
-  { id: "solar-flare", name: "Solar Flare", description: "Deep red, orange and gold", stops: ["#9b102a", "#f15a24", "#e6bd36"] },
-  { id: "moonstone", name: "Moonstone", description: "Slate blue and soft silver", stops: ["#1e2940", "#667894", "#c2cbd6"] },
-  { id: "toxic", name: "Toxic", description: "Acid green with purple contrast", stops: ["#376b08", "#a8db16", "#692295"] },
+  { id: "wykt", name: "Wykt", description: "Vivid blue fading into rich violet", stops: ["#225dff", "#3248ff", "#8d3bff", "#762fff"] },
+  { id: "abyss", name: "Abyss", description: "Ocean blue with vivid teal edges", stops: ["#148dff", "#0fa9ff", "#11f2ff"] },
+  { id: "amethyst", name: "Amethyst", description: "Plum, violet and lilac", stops: ["#932eff", "#ae34ff", "#d479ff"] },
+  { id: "aurora", name: "Aurora", description: "Mint through indigo", stops: ["#1cffbc", "#2effc3", "#3398ff", "#9350ff"] },
+  { id: "blue-hour", name: "Blue Hour", description: "Twilight blues and lavender", stops: ["#1b6fff", "#317cff", "#a39eff"] },
+  { id: "cyber", name: "Cyber", description: "Electric cyan and hot magenta", stops: ["#00e2ff", "#505aff", "#ff1fab"] },
+  { id: "ember-glow", name: "Ember Glow", description: "Burgundy through warm amber", stops: ["#ff1d5a", "#ff3826", "#ffa128"] },
+  { id: "forest", name: "Forest", description: "Pine, moss and soft jade", stops: ["#2fffca", "#60ff96", "#b8ff89"] },
+  { id: "glacier", name: "Glacier", description: "Ice blue with a cool white crest", stops: ["#197eff", "#4ad0ff", "#cef0ff"] },
+  { id: "rose-quartz", name: "Rose Quartz", description: "Mulberry, rose and blush", stops: ["#ff52db", "#ff66ab", "#ffb6cd"] },
+  { id: "sakura", name: "Sakura", description: "Violet dusk with pink blossoms", stops: ["#d773ff", "#ff8dea", "#ffbbd7"] },
+  { id: "solar-flare", name: "Solar Flare", description: "Deep red, orange and gold", stops: ["#ff1a45", "#ff5f26", "#ffd23c"] },
+  { id: "moonstone", name: "Moonstone", description: "Slate blue and soft silver", stops: ["#78a3ff", "#b0cfff", "#e7f2ff"] },
+  { id: "toxic", name: "Toxic", description: "Acid green with purple contrast", stops: ["#83ff13", "#c4ff1a", "#b43aff"] },
 ].map(preset => ({ ...preset, source: "Studio" }));
 
 export const lightingPresets = [...studioPresets, ...wootilityPresets];
@@ -157,8 +157,9 @@ export function sampleGradient(stops, position) {
   const channels = hex => hex.slice(1).match(/../g).map(value => parseInt(value, 16));
   const start = channels(stops[index]);
   const end = channels(stops[index + 1]);
-  return "#" + start.map((value, channel) => Math.round(value + (end[channel] - value) * fraction)
-    .toString(16).padStart(2, "0")).join("");
+  const mixed = start.map((value, channel) => value + (end[channel] - value) * fraction);
+  const peak = Math.max(1, ...mixed);
+  return "#" + mixed.map(value => Math.round(value * 255 / peak).toString(16).padStart(2, "0")).join("");
 }
 
 export function presetColors(preset, family, variant = "ANSI") {

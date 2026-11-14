@@ -56,14 +56,14 @@ test("all 23 presets supply independent valid RGB matrices for every supported m
   assert.equal(presetColors(wootilityPresets.find(preset => preset.name === "Seawave"), "80")[0][0], "#0000ff");
 });
 
-test("Wykt stays dark blue and purple across every spacebar LED and survives RGB565 conversion", () => {
+test("Wykt stays blue and purple at full intensity across every spacebar LED and survives RGB565 conversion", () => {
   const preset = studioPresets.find(preset => preset.id === "wykt");
   for (const model of models.filter(model => model.rgb !== false)) {
     for (const variant of model.layouts) {
       const colors = presetColors(preset, model.id, variant);
       for (const hex of colors.flat()) {
         const red = parseInt(hex.slice(1, 3), 16), green = parseInt(hex.slice(3, 5), 16), blue = parseInt(hex.slice(5), 16);
-        assert.ok(blue > red && blue > green && Math.max(red, green, blue) <= 102);
+        assert.ok(blue > red && blue > green && Math.max(red, green, blue) === 255);
         assert.ok((colorWord(hex) & 31) > 0);
       }
       for (const key of layout(model.id, variant).flat().filter(key => key.code === "Space")) {
@@ -78,7 +78,7 @@ test("normal onboard save writes all five spacebar LEDs and clears the wave befo
   const session = new KeyboardSession({ collections: [{ usagePage: 0xff55, usage: 1 }] }, model);
   session.profileEditing = true;
   const original = makeDemo("80", "ANSI");
-  const core = join([field(1, field(1, 255)), field(4, field(1, field(1, field(2, 16))))]);
+  const core = join([field(1, field(1, 64)), field(4, field(1, field(1, field(2, 16))))]);
   const page = rows => join(rows.map(row => {
     const words = join(row.map(color => varint(colorWord(color))));
     return field(1, field(1, words));
@@ -89,7 +89,7 @@ test("normal onboard save writes all five spacebar LEDs and clears the wave befo
   const draft = structuredClone(original);
   const space = layout("80").flat().find(key => key.code === "Space");
   paintKey(draft.colors, space, "#141d66", "80", "ANSI");
-  draft.lighting = { ...original.lighting, effect: "static", clearEffects: true };
+  draft.lighting = { ...original.lighting, brightness: 100, effect: "static", clearEffects: true };
   const current = structuredClone(original);
   const writes = [];
   session.activeSlot = async () => 0;
@@ -109,5 +109,18 @@ test("normal onboard save writes all five spacebar LEDs and clears the wave befo
   const row = integers(blobs(current.wire.lower, 1)[2], 1);
   assert.deepEqual(row.slice(4, 9), Array(5).fill(colorWord("#141d66")));
   assert.equal(blobs(current.wire.core, 4).length, 0);
+  assert.equal(integer(blobs(current.wire.core, 1)[0], 1), 255);
   assert.deepEqual(writes, [0x0f, 0x16]);
+});
+
+
+test("every Studio gradient uses full RGB intensity between its stops", () => {
+  for (const preset of studioPresets) {
+    for (const model of models) {
+      for (const hex of presetColors(preset, model.id).flat()) {
+        const channels = hex.slice(1).match(/../g).map(value => parseInt(value, 16));
+        assert.equal(Math.max(...channels), 255, `${preset.name} on ${model.name}`);
+      }
+    }
+  }
 });

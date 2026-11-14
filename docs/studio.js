@@ -857,16 +857,17 @@ function renderLightingPresets() {
       stage(profile => {
         profile.colors = colors.map(row => [...row]);
         stageSolidPaint(profile);
+        if (canEditLighting()) profile.lighting.brightness = 100;
         if (el("preset-lightbar").checked && canEditLightbar()) {
           const width = Math.max(...keys.map(key => key.col));
-          profile.lightbar = { ...profile.lightbar, enabled: true, mode: "segments",
+          profile.lightbar = { ...profile.lightbar, enabled: true, linked: false, brightness: 100, mode: "segments",
             segments: Array.from({ length: lightbarLength }, (_, index) => colors[1][Math.round(index * width / (lightbarLength - 1))]) };
         }
       });
       lightingInputs();
       lightbarInputs();
       status(`${preset.name} staged for the whole keyboard. Review & save to apply.${
-        el("solid-paint").checked && !canEditLighting() ? " Effect editing is unavailable in this slot." : ""}`);
+        !canEditLighting() ? " Brightness and effect editing are unavailable in this slot." : ""}`);
     });
     return button;
   });
