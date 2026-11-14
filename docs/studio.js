@@ -1,8 +1,9 @@
 import { colorHex, colorWord, connectKeyboard } from "./device.js";
-import { bindingLabel, codes, keyOptions, layout, makeDemo, usageLabel } from "./layout.js";
+import { bindingLabel, codes, keyOptions, layout, makeDemo, paintKey, usageLabel } from "./layout.js";
 import { getModel, models } from "./models.js";
 import { advancedLabel } from "./customizations.js";
 import { lightbarLength, validLightbar } from "./lightbar.js";
+import { lightingPresets, presetColors } from "./presets.js";
 
 const el = id => document.getElementById(id);
 const setText = (id, value) => { el(id).textContent = value; };
@@ -243,11 +244,14 @@ function update() {
   el("paint-all").disabled = busy || !rgbAvailable();
   el("brush-tool").disabled = !rgbAvailable();
   el("gradient").disabled = busy || !rgbAvailable();
-  for (const button of document.querySelectorAll("[data-palette]")) button.disabled = busy || !rgbAvailable();
+  for (const button of document.querySelectorAll("[data-palette], [data-preset]")) button.disabled = busy || !rgbAvailable();
+  el("preset-lightbar").disabled = busy || !canEditLightbar();
   el("preview").disabled = busy || !session?.previewAvailable;
   el("stage-lighting").disabled = busy || !canEditLighting();
+  el("solid-paint").disabled = busy || !canEditLighting();
   setText("lighting-hint", !rgbAvailable() ? "This model has no RGB lighting." :
-    canEditLighting() ? "The board previews the base effect. Live keyboard preview shows the static palette." :
+    canEditLighting() ? draft.lighting.clearEffects ? "Static colors staged. Saving clears the keyboard’s RGB effect layers." :
+      `The profile has ${draft.lighting.effectLayers || 0} RGB effect layers. Solid painting clears them when you save.` :
     "Onboard effect editing is available only in supported first slots. Per-key colors have separate controls.");
   el("restore").disabled = busy || !session?.previewing;
   el("monitor-toggle").disabled = busy || Boolean(session && !session.analogDevice);
@@ -313,6 +317,7 @@ function replaceProfile(profile) {
   syncSelection();
   lightingInputs();
   lightbarInputs();
+  renderLightingPresets();
   renderProfiles();
   update();
 }
@@ -793,8 +798,10 @@ on("color-plane", "pointermove", event => {
 function paint(targets, color = el("color").value) {
   if (!rgbAvailable()) return;
   stage(profile => {
-    for (const key of targets) profile.colors[key.row][key.col] = color;
+    for (const key of targets) paintKey(profile.colors, key, color, family, variant);
+    stageSolidPaint(profile);
   });
+  lightingInputs();
 }
 on("paint-selected", "click", () => paint(keys.filter(key => selected.has(key.id))));
 on("paint-all", "click", () => paint(keys));
@@ -809,13 +816,64 @@ function gradient(recipe) {
   stage(profile => {
     for (const key of targets) {
       const ratio = (key.col - left) / span;
-      profile.colors[key.row][key.col] = "#" + start.map((channel, i) => Math.round(channel + (end[i] - channel) * ratio)
+      const color = "#" + start.map((channel, i) => Math.round(channel + (end[i] - channel) * ratio)
         .toString(16).padStart(2, "0")).join("");
+      paintKey(profile.colors, key, color, family, variant);
     }
+    stageSolidPaint(profile);
   });
+  lightingInputs();
 }
 on("gradient", "click", () => gradient("prism"));
 for (const button of document.querySelectorAll("[data-palette]")) button.addEventListener("click", () => gradient(button.dataset.palette));
+function stageSolidPaint(profile) {
+  if (el("solid-paint").checked && canEditLighting() &&
+      (profile.lighting.effect !== "static" || profile.lighting.effectLayers > 0)) {
+    profile.lighting = { ...profile.lighting, effect: "static", speed: 16, clearEffects: true };
+  }
+}
+
+function renderLightingPresets() {
+  const collection = el("preset-collection").value;
+  const cards = lightingPresets.filter(preset => collection === "all" || preset.source === collection).map(preset => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "lighting-preset";
+    button.dataset.preset = preset.id;
+    button.disabled = busy || !rgbAvailable();
+    const colors = presetColors(preset, family, variant);
+    const swatches = preset.stops || [...new Set(colors.flat())].slice(0, 12);
+    button.style.setProperty("--preset-gradient", `linear-gradient(110deg, ${swatches.join(", ")})`);
+    const preview = document.createElement("span");
+    preview.className = "preset-preview";
+    preview.setAttribute("aria-hidden", "true");
+    const title = document.createElement("strong");
+    title.textContent = preset.name;
+    const detail = document.createElement("small");
+    detail.textContent = preset.description || `${preset.source} color preset`;
+    button.append(preview, title, detail);
+    button.addEventListener("click", () => {
+      if (busy || !rgbAvailable()) return;
+      stage(profile => {
+        profile.colors = colors.map(row => [...row]);
+        stageSolidPaint(profile);
+        if (el("preset-lightbar").checked && canEditLightbar()) {
+          const width = Math.max(...keys.map(key => key.col));
+          profile.lightbar = { ...profile.lightbar, enabled: true, mode: "segments",
+            segments: Array.from({ length: lightbarLength }, (_, index) => colors[1][Math.round(index * width / (lightbarLength - 1))]) };
+        }
+      });
+      lightingInputs();
+      lightbarInputs();
+      status(`${preset.name} staged for the whole keyboard. Review & save to apply.${
+        el("solid-paint").checked && !canEditLighting() ? " Effect editing is unavailable in this slot." : ""}`);
+    });
+    return button;
+  });
+  el("lighting-presets").replaceChildren(...cards);
+}
+on("preset-collection", "change", renderLightingPresets);
+
 function lightingInputs() {
   el("lighting-effect").value = draft.lighting.effect;
   el("lighting-brightness").value = draft.lighting.brightness;
@@ -856,7 +914,8 @@ on("stage-lighting", "click", () => run(() => {
   }
   stage(profile => {
     profile.lighting = { brightness: Number(el("lighting-brightness").value), effect,
-      speed: effect === "static" ? 16 : speed, ...(Object.keys(indicators).length ? { indicators } : {}) };
+      speed: effect === "static" ? 16 : speed, clearEffects: effect === "static",
+      ...(Object.keys(indicators).length ? { indicators } : {}) };
   });
 }));
 on("preview", "click", () => run(async () => {
@@ -1328,6 +1387,7 @@ function loadPreset(preset) {
   const validLighting = value => object(value) && el("lighting-effect").querySelector(`option[value="${CSS.escape(String(value.effect))}"]`) &&
     Number.isInteger(value.brightness) && value.brightness >= 0 && value.brightness <= 100 &&
     Number.isInteger(value.speed) && value.speed >= (value.effect === "spiral" ? -255 : 0) && value.speed <= 255 &&
+    (value.clearEffects === undefined || typeof value.clearEffects === "boolean" && (!value.clearEffects || value.effect === "static")) &&
     (value.indicators === undefined || object(value.indicators) && Object.entries(value.indicators).every(([name, color]) =>
       ["caps", "fn", "scroll", "num"].includes(name) && Number.isInteger(color) && color >= 0 && color <= 65535));
   const validAdvanced = value => object(value) && Object.entries(value).every(([index, action]) => {

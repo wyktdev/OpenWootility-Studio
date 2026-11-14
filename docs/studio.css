@@ -355,3 +355,12 @@ input[type="search"], input[type="number"] { width: 100%; min-width: 0; padding:
   .device-card .model-picker { max-width: 12rem; }
   .mode-bar { padding: 0; }
 }
+
+.lighting-library { grid-column: 1 / -1; order: 1; }
+.lighting-library header label { min-width: 10rem; }
+.lighting-presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: .65rem; margin-top: 1rem; }
+.lighting-preset { display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; text-align: left; padding: .8rem; min-height: 108px; }
+.lighting-preset .preset-preview { display: block; width: 100%; height: 24px; border-radius: 5px; background: var(--preset-gradient); }
+.lighting-preset small { font-size: .7rem; line-height: 1.4; color: var(--muted); }
+.lighting-preset[data-preset="wykt"] { border-color: #7266ce; background: linear-gradient(135deg, #111f3a, #251436); }
+.preset-credit { margin-top: 1rem; font-size: .75rem; }

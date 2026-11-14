@@ -12,7 +12,8 @@ const kinds = new Map([["dks", 1], ["mod-tap", 2], ["toggle", 3], ["rappy", 4], 
 export function lightingSettings(data) {
   const [base = empty] = blobs(data, 1);
   const [stack = empty] = blobs(data, 4);
-  const settings = { brightness: Math.round((integer(base, 1) ?? 255) * 100 / 255), effect: "static", speed: 16 };
+  const settings = { brightness: Math.round((integer(base, 1) ?? 255) * 100 / 255), effect: "static", speed: 16,
+    effectLayers: blobs(stack, 1).length };
   const indicators = Object.fromEntries([["caps", 2], ["fn", 3], ["scroll", 4], ["num", 5]]
     .map(([name, field]) => [name, integer(base, field)]).filter(([, color]) => color !== undefined && color <= 65535));
   if (Object.keys(indicators).length) settings.indicators = indicators;
@@ -40,6 +41,11 @@ export function patchLighting(data, settings, before) {
     if (color !== undefined && color !== before.indicators?.[name]) editedBase = replaceField(editedBase, field, [color]);
   }
   const updated = editedBase === base ? data : replaceField(data, 1, [editedBase]);
+  if (settings.clearEffects) {
+    const [stack = empty] = blobs(data, 4);
+    const cleared = replaceField(stack, 1, []);
+    return replaceField(updated, 4, cleared.length ? [cleared] : []);
+  }
   if (settings.effect === before.effect && settings.speed === before.speed) return updated;
   const [stack = empty] = blobs(data, 4);
   const layers = blobs(stack, 1);

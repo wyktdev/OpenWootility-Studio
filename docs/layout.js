@@ -98,6 +98,20 @@ export function layout(family, variant = getModel(family).layouts[0]) {
   })).filter(row => row.length);
 }
 
+// The long spacebar has five independently addressed LEDs on compact and 80% models.
+// JIS uses the three center LEDs. Split layouts expose separate physical keys.
+export function rgbPositions(key, family, variant = "ANSI") {
+  const shape = getModel(family).shape;
+  if (key.code !== "Space" || key.row !== 5 || variant.endsWith("Split") ||
+      (shape !== "compact" && shape !== "80")) return [[key.row, key.col]];
+  const columns = variant === "JIS" ? [5, 6, 7] : [4, 5, 6, 7, 8];
+  return columns.map(col => [5, col]);
+}
+
+export function paintKey(colors, key, color, family, variant) {
+  for (const [row, col] of rgbPositions(key, family, variant)) colors[row][col] = color;
+}
+
 export function makeDemo(family, variant) {
   const map = Array.from({ length: 6 }, () => Array(21).fill(255));
   const colors = Array.from({ length: 6 }, () => Array(21).fill("#102030"));
@@ -106,8 +120,9 @@ export function makeDemo(family, variant) {
   for (const key of keys) {
     map[key.row][key.col] = key.value;
     const ratio = key.col / maxCol;
-    colors[key.row][key.col] = "#" + [168 - 80 * ratio, 116 + 90 * ratio, 236 - 45 * ratio]
+    const color = "#" + [168 - 80 * ratio, 116 + 90 * ratio, 236 - 45 * ratio]
       .map(channel => Math.round(channel).toString(16).padStart(2, "0")).join("");
+    paintKey(colors, key, color, family, variant);
   }
   return { slot: 0, layer: 0, tune: { actuation: 1.6, enabled: true, sensitivity: .2 },
     actuation: {}, rapid: {}, colors, map, lighting: { brightness: 100, effect: "static", speed: 16 }, advanced: {},

@@ -36,7 +36,7 @@
         <button type="button" data-tab="profiles"><span aria-hidden="true">▤</span> Profiles</button>
         <button type="button" data-tab="device"><span aria-hidden="true">⊞</span> Device</button>
       </nav>
-      <span class="app-version">STUDIO <span>0.6.2</span></span>
+      <span class="app-version">STUDIO <span>0.7.0</span></span>
     </header>
 
     <aside class="sidebar" aria-label="Device and profiles">
@@ -142,9 +142,17 @@
             <section class="tile paint-tile">
               <h3>Paint tools</h3>
               <div class="palette" id="palette" aria-label="Color swatches"></div>
+              <label class="toggle"><input id="solid-paint" type="checkbox" checked><span aria-hidden="true"></span> Use solid colors when painting (clear RGB effects)</label>
               <div class="row"><button id="paint-selected" class="primary" type="button">Paint selected</button><button id="paint-all" type="button">Apply color to all keys</button></div>
               <div class="preset-ribbon"><span class="gradient-sample" aria-hidden="true"></span><div><strong>Color recipes</strong><p class="muted">Apply to your selection or the whole board</p></div></div>
               <div class="row"><button id="gradient" type="button">Prism</button><button type="button" data-palette="ember">Ember</button><button type="button" data-palette="ocean">Ocean</button></div>
+            </section>
+            <section class="tile lighting-library" aria-labelledby="lighting-library-title">
+              <header class="split"><div><h3 id="lighting-library-title">Preset library</h3><p class="muted">14 Studio palettes and all 9 Wootility built-in color presets.</p></div><label>Collection <select id="preset-collection"><option value="all">All presets</option><option value="Studio">Studio originals</option><option value="Wootility">Wootility colors</option></select></label></header>
+              <p class="muted">Choose a card to stage colors across the entire keyboard. Use Review &amp; save to apply them.</p>
+              <label class="toggle"><input id="preset-lightbar" type="checkbox"><span aria-hidden="true"></span> Match the lightbar base to the palette</label>
+              <div id="lighting-presets" class="lighting-presets"></div>
+              <p class="muted preset-credit">Wootility color preset names and RGB values are credited to Wooting. Studio palettes are by wyktdev. Palettes use static colors and your current brightness.</p>
             </section>
             <section class="tile preview-tile">
               <h3>Lighting effect</h3>

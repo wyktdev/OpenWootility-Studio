@@ -12,7 +12,8 @@ An independent keyboard editor for the Wooting lineup. Explore each model offlin
 ## Workspaces
 
 - **Performance** edits profile and per-key actuation, Rapid Trigger, separate press and release sensitivity, and per-key continuous mode. Quick starts stage typing, balanced, or fast-response defaults.
-- **Lighting** has Select All, key groups, brush painting, gradients, static hardware preview, and seven base styles with adjustable brightness, speed, and supported lock-indicator colors.
+- **Lighting** has Select All, key groups, brush painting, gradients, static hardware preview, and seven base styles with adjustable brightness, speed, and supported lock-indicator colors. Spacebar painting addresses all five LEDs on standard compact and 80% layouts, or the three LEDs on JIS. The enabled-by-default solid-paint option clears RGB effect layers when the current slot supports effect editing.
+- **Preset library** in Lighting includes all nine Wootility built-in static color palettes and 14 Studio originals. **Wykt** uses dark navy, blue and deep purple. Cards apply to the whole keyboard and retain the current brightness. Optionally match the lightbar base with the checkbox above the cards. Presets stage edits for review before saving.
 - **Lightbar** shows the ten colors reported by the connected 80HE or 80HE+ above the arrow cluster. In Lighting, use **Connect for live colors** if the board is in demo mode. The app can reconnect to one keyboard already allowed by the browser. Click the strip to edit the base layer, sample colors from selected keys, or apply a recipe. Unsaved edits have their own preview in the editor. Saving preserves the slot's existing indicator layers.
 - **Keymap** reads base and Fn layers and supports binding search and keystroke capture. A layer inherited from the first slot is editable from that slot.
 - **Advanced keys** edits Dynamic Keystroke, Mod Tap, Toggle Key, Rappy Snappy, and Snappy Tappy. The editor shows actions by key and layer.
@@ -48,8 +49,14 @@ go build -trimpath -ldflags "-s -w -H=windowsgui" -o OpenWootility.exe .
 
 For local development, run `go run . -serve` and open [localhost:8769](http://localhost:8769) in Edge or Chrome.
 
-Run `node --test` to check analog report parsing, per-switch travel conversion, and lightbar profile encoding.
+Run `node --test` to check analog report parsing, per-switch travel conversion, lightbar profile encoding, spacebar LED coverage, the preset library, and RGB writes.
 
 ## Interoperability and credits
 
 OpenWootility contains its own application code and artwork. It is independent of Wooting Technologies B.V. and uses the product names to identify compatible hardware. The implementation references the public [Wooting RGB SDK](https://github.com/WootingKb/wooting-rgb-sdk), [Wooting Analog SDK](https://github.com/WootingKb/wooting-analog-sdk), [Wooting WebHID analog example](https://github.com/WootingKb/switchy-tax-fraud/blob/main/src/components/ConnectDevice.tsx), and [OpenMouse ARM protocol notes](https://github.com/OpenMouse-Project/keyboard-protocol/blob/3f9158fe83d7d04ae0b86e4ff26442359ec177c7/docs/wooting-support.md). This project is under the [MIT License](LICENSE).
+
+### Color preset attribution
+
+The nine Wootility color palettes are Rainbow, Seawave, Inferno, Miami FPS, Summer Breeze, Alternator, Clay, Lekker, and Sunset. Their names and numeric RGB matrices are credited to Wooting and were checked against the public [Wootility Web bundle](https://wootility.io/assets/index-BaoALhfv.js) on November 14, 2026. Compact and keypad Rainbow, compact Sunset, and 80% Alternator and Lekker variants are included. These entries reproduce static palette values. Studio renders and applies them with its own code. Custom user profiles and animated effect stacks are separate from this library.
+
+The 14 original Studio palettes are Wykt, Abyss, Amethyst, Aurora, Blue Hour, Cyber, Ember Glow, Forest, Glacier, Rose Quartz, Sakura, Solar Flare, Moonstone, and Toxic.
